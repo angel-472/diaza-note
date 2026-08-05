@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+/* disable double tab zoom */
+:root {
+  touch-action: pan-x pan-y;
+  height: 100% 
+}
