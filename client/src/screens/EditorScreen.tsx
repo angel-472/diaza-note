@@ -54,24 +54,24 @@ export default function EditorScreen({
   })
 
   return (
-    <div className="flex h-dvh flex-col bg-neutral-950">
+    <div className="flex h-dvh flex-col bg-zinc-950">
       <header className="shrink-0">
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-2 px-2 pt-4 pb-2 sm:px-4 lg:max-w-3xl">
           <button
             type="button"
             onClick={onBack}
-            className="flex min-w-0 items-center gap-1 py-1 pr-3 text-base text-amber-400 active:opacity-60"
+            className="flex min-w-0 items-center gap-1 py-1 pr-3 text-base text-cyan-400 active:opacity-60"
           >
             <ChevronLeft className="size-5 shrink-0" />
             <span className="truncate">{backLabel}</span>
           </button>
           <div className="flex shrink-0 items-center gap-1">
-            {note.isPinned && <Pin className="size-4 text-amber-400" />}
+            {note.isPinned && <Pin className="size-4 text-cyan-400" />}
             <button
               type="button"
               aria-label="Note actions"
               onClick={() => setIsMenuOpen(true)}
-              className="flex size-9 items-center justify-center rounded-lg text-amber-400 active:bg-neutral-900"
+              className="flex size-9 items-center justify-center rounded-lg text-cyan-400 active:bg-zinc-900"
             >
               <MoreHorizontal className="size-5" />
             </button>
@@ -88,7 +88,7 @@ export default function EditorScreen({
             value={note.title}
             onChange={(event) => onChangeTitle(event.target.value)}
             placeholder="Title"
-            className="w-full pt-4 pb-2 text-2xl font-bold tracking-tight text-neutral-50 outline-none placeholder:text-neutral-600 sm:text-3xl"
+            className="w-full pt-4 pb-2 text-2xl font-bold tracking-tight text-zinc-50 outline-none placeholder:text-zinc-600 sm:text-3xl"
           />
 
           <div className="pb-3">

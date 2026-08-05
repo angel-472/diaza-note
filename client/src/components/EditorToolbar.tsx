@@ -36,7 +36,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
   })
 
   return (
-    <div className="shrink-0 border-b border-neutral-800 bg-neutral-900">
+    <div className="shrink-0 border-b border-zinc-800 bg-zinc-900">
       <div className="mx-auto flex w-full max-w-2xl items-center gap-1 overflow-x-auto px-2 py-2 sm:px-4 lg:max-w-3xl">
         <ToolButton
           label="Bold"
@@ -63,7 +63,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
           onClick={() => editor.chain().focus().toggleStrike().run()}
         />
 
-        <div className="mx-1 h-5 w-px shrink-0 bg-neutral-700" />
+        <div className="mx-1 h-5 w-px shrink-0 bg-zinc-700" />
 
         <ToolButton
           label="Heading 1"
@@ -78,7 +78,7 @@ export default function EditorToolbar({ editor }: { editor: Editor }) {
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         />
 
-        <div className="mx-1 h-5 w-px shrink-0 bg-neutral-700" />
+        <div className="mx-1 h-5 w-px shrink-0 bg-zinc-700" />
 
         <ToolButton
           label="Bullet list"
@@ -123,7 +123,7 @@ function ToolButton({
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
-        active ? 'bg-amber-400 text-neutral-950' : 'text-neutral-400 active:bg-neutral-800'
+        active ? 'bg-cyan-400 text-zinc-950' : 'text-zinc-400 active:bg-zinc-800'
       }`}
     >
       <Icon className="size-5" strokeWidth={2} />

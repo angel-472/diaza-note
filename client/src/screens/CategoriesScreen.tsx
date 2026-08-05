@@ -58,17 +58,17 @@ export default function CategoriesScreen({
   }))
 
   return (
-    <div className="flex h-dvh flex-col bg-neutral-950">
+    <div className="flex h-dvh flex-col bg-zinc-950">
       <header className="mx-auto w-full max-w-2xl shrink-0 px-4 pt-6 pb-3 sm:px-6 lg:max-w-3xl">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="font-heading text-3xl font-bold tracking-tight text-neutral-50 sm:text-4xl">
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
             Categories
           </h1>
           <div className="flex shrink-0 items-center gap-1">
             <button
               type="button"
               onClick={() => setIsEditing((current) => !current)}
-              className="rounded-lg px-2 py-1 text-base text-amber-400 active:bg-neutral-900"
+              className="rounded-lg px-2 py-1 text-base text-cyan-400 active:bg-zinc-900"
             >
               {isEditing ? 'Done' : 'Edit'}
             </button>
@@ -76,7 +76,7 @@ export default function CategoriesScreen({
               type="button"
               aria-label="New category"
               onClick={() => setIsCreateOpen(true)}
-              className="flex size-9 items-center justify-center rounded-lg text-amber-400 active:bg-neutral-900"
+              className="flex size-9 items-center justify-center rounded-lg text-cyan-400 active:bg-zinc-900"
             >
               <FolderPlus className="size-5" />
             </button>
@@ -118,7 +118,7 @@ export default function CategoriesScreen({
 
       {pendingDelete && (
         <Sheet title={`Delete "${pendingDelete.name}"`} onClose={() => setPendingDelete(null)}>
-          <p className="px-4 pb-2 text-sm text-neutral-400">
+          <p className="px-4 pb-2 text-sm text-zinc-400">
             Notes in this category are kept and become Unsorted if they have no other category.
           </p>
           <button
@@ -127,14 +127,14 @@ export default function CategoriesScreen({
               onDeleteCategory(pendingDelete.id)
               setPendingDelete(null)
             }}
-            className="w-full px-4 py-3 text-left text-base text-red-400 active:bg-neutral-800"
+            className="w-full px-4 py-3 text-left text-base text-red-400 active:bg-zinc-800"
           >
             Delete Category
           </button>
           <button
             type="button"
             onClick={() => setPendingDelete(null)}
-            className="w-full px-4 py-3 text-left text-base text-neutral-100 active:bg-neutral-800"
+            className="w-full px-4 py-3 text-left text-base text-zinc-100 active:bg-zinc-800"
           >
             Cancel
           </button>
@@ -162,7 +162,7 @@ function RowGroup({
   if (rows.length === 0) return null
 
   return (
-    <ul className="overflow-hidden rounded-xl bg-neutral-900">
+    <ul className="overflow-hidden rounded-xl bg-zinc-900">
       {rows.map((row, index) => {
         const Icon = row.icon
         const count = filterNotes(notes, row.filter).length
@@ -174,12 +174,12 @@ function RowGroup({
               <button
                 type="button"
                 onClick={() => onOpenFilter(row.filter)}
-                className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left active:bg-neutral-800"
+                className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left active:bg-zinc-800"
               >
-                <Icon className="size-5 shrink-0 text-amber-400" strokeWidth={2} />
-                <span className="flex-1 truncate text-base text-neutral-100">{row.label}</span>
-                <span className="text-base tabular-nums text-neutral-500">{count}</span>
-                {!showDelete && <ChevronRight className="size-4 shrink-0 text-neutral-600" />}
+                <Icon className="size-5 shrink-0 text-cyan-400" strokeWidth={2} />
+                <span className="flex-1 truncate text-base text-zinc-100">{row.label}</span>
+                <span className="text-base tabular-nums text-zinc-500">{count}</span>
+                {!showDelete && <ChevronRight className="size-4 shrink-0 text-zinc-600" />}
               </button>
               
               {showDelete && (
@@ -190,13 +190,13 @@ function RowGroup({
                     const category = categories.find((candidate) => candidate.id === row.key)
                     if (category) onRequestDelete(category)
                   }}
-                  className="mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-red-400 active:bg-neutral-800"
+                  className="mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-red-400 active:bg-zinc-800"
                 >
                   <Trash2 className="size-5" />
                 </button>
               )}
             </div>
-            {index < rows.length - 1 && <div className="ml-12 border-b border-neutral-800" />}
+            {index < rows.length - 1 && <div className="ml-12 border-b border-zinc-800" />}
           </li>
         )
       })}
@@ -227,12 +227,12 @@ function NewCategorySheet({
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="Name"
-          className="w-full rounded-lg bg-neutral-800 px-3 py-2 text-base text-neutral-100 outline-none placeholder:text-neutral-500"
+          className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-base text-zinc-100 outline-none placeholder:text-zinc-500"
         />
         <button
           type="submit"
           disabled={!name.trim()}
-          className="w-full rounded-lg bg-amber-400 py-2 text-base font-semibold text-neutral-950 disabled:bg-neutral-800 disabled:text-neutral-500"
+          className="w-full rounded-lg bg-cyan-400 py-2 text-base font-semibold text-zinc-950 disabled:bg-zinc-800 disabled:text-zinc-500"
         >
           Create
         </button>

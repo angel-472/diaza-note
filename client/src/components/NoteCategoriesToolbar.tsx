@@ -39,14 +39,14 @@ export default function NoteCategoriesToolbar({
         {selected.map((category) => (
           <span
             key={category.id}
-            className="flex items-center gap-1 rounded-full bg-amber-400/15 py-1 pr-1 pl-3 text-sm text-amber-300"
+            className="flex items-center gap-1 rounded-full bg-cyan-400/15 py-1 pr-1 pl-3 text-sm text-cyan-300"
           >
             {category.name}
             <button
               type="button"
               aria-label={`Remove from ${category.name}`}
               onClick={() => onRemove(category.id)}
-              className="flex size-5 items-center justify-center rounded-full text-amber-400 active:bg-amber-400/25"
+              className="flex size-5 items-center justify-center rounded-full text-cyan-400 active:bg-cyan-400/25"
             >
               <X className="size-3" strokeWidth={3} />
             </button>
@@ -56,7 +56,7 @@ export default function NoteCategoriesToolbar({
         <button
           type="button"
           onClick={() => setIsPickerOpen(true)}
-          className="flex items-center gap-1 rounded-full border border-neutral-700 py-1 pr-3 pl-2 text-sm text-neutral-400 active:bg-neutral-900"
+          className="flex items-center gap-1 rounded-full border border-zinc-700 py-1 pr-3 pl-2 text-sm text-zinc-400 active:bg-zinc-900"
         >
           <Plus className="size-4" />
           Category
@@ -90,12 +90,12 @@ export default function NoteCategoriesToolbar({
               value={newName}
               onChange={(event) => setNewName(event.target.value)}
               placeholder="New category"
-              className="min-w-0 flex-1 rounded-lg bg-neutral-800 px-3 py-2 text-base text-neutral-100 outline-none placeholder:text-neutral-500"
+              className="min-w-0 flex-1 rounded-lg bg-zinc-800 px-3 py-2 text-base text-zinc-100 outline-none placeholder:text-zinc-500"
             />
             <button
               type="submit"
               disabled={!newName.trim()}
-              className="shrink-0 rounded-lg bg-amber-400 px-4 py-2 text-base font-semibold text-neutral-950 disabled:bg-neutral-800 disabled:text-neutral-500"
+              className="shrink-0 rounded-lg bg-cyan-400 px-4 py-2 text-base font-semibold text-zinc-950 disabled:bg-zinc-800 disabled:text-zinc-500"
             >
               Add
             </button>

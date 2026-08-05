@@ -63,35 +63,35 @@ export default function NoteListScreen({
   const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? ''
 
   return (
-    <div className="flex h-dvh flex-col bg-neutral-950">
+    <div className="flex h-dvh flex-col bg-zinc-950">
       <header className="mx-auto w-full max-w-2xl shrink-0 px-4 pt-4 sm:px-6 lg:max-w-3xl">
         <button
           type="button"
           onClick={onBack}
-          className="-ml-1 flex items-center gap-1 py-1 pr-3 text-base text-amber-400 active:opacity-60"
+          className="-ml-1 flex items-center gap-1 py-1 pr-3 text-base text-cyan-400 active:opacity-60"
         >
           <ChevronLeft className="size-5" />
           Categories
         </button>
 
-        <h1 className="pt-2 pb-3 font-heading text-3xl font-bold tracking-tight text-neutral-50 sm:text-4xl">
+        <h1 className="pt-2 pb-3 font-heading text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
           {title}
         </h1>
 
         <div className="relative">
-          <Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-neutral-500" />
+          <Search className="pointer-events-none absolute top-2.5 left-3 size-4 text-zinc-500" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search"
-            className="w-full rounded-lg bg-neutral-900 py-2 pr-9 pl-9 text-base text-neutral-100 outline-none placeholder:text-neutral-500"
+            className="w-full rounded-lg bg-zinc-900 py-2 pr-9 pl-9 text-base text-zinc-100 outline-none placeholder:text-zinc-500"
           />
           {query && (
             <button
               type="button"
               aria-label="Clear search"
               onClick={() => setQuery('')}
-              className="absolute top-1.5 right-1.5 flex size-7 items-center justify-center rounded-lg text-neutral-500 active:bg-neutral-800"
+              className="absolute top-1.5 right-1.5 flex size-7 items-center justify-center rounded-lg text-zinc-500 active:bg-zinc-800"
             >
               <X className="size-4" />
             </button>
@@ -101,7 +101,7 @@ export default function NoteListScreen({
         <button
           type="button"
           onClick={() => setIsSortOpen(true)}
-          className="-ml-1 mt-2 flex items-center gap-1.5 rounded-lg px-1 py-1 text-sm text-neutral-400 active:bg-neutral-900"
+          className="-ml-1 mt-2 flex items-center gap-1.5 rounded-lg px-1 py-1 text-sm text-zinc-400 active:bg-zinc-900"
         >
           <ArrowUpDown className="size-4" />
           Sorted by {sortLabel}
@@ -111,7 +111,7 @@ export default function NoteListScreen({
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-2xl px-4 pt-2 pb-24 sm:px-6 lg:max-w-3xl">
           {visibleNotes.length === 0 ? (
-            <p className="px-1 py-8 text-center text-base text-neutral-500">
+            <p className="px-1 py-8 text-center text-base text-zinc-500">
               {query ? 'No matches' : 'No notes'}
             </p>
           ) : (
@@ -150,7 +150,7 @@ export default function NoteListScreen({
             type="button"
             aria-label="New note"
             onClick={onCreateNote}
-            className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-amber-400 text-neutral-950 shadow-lg active:bg-amber-500"
+            className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-cyan-400 text-zinc-950 shadow-lg active:bg-cyan-500"
           >
             <SquarePen className="size-6" />
           </button>
@@ -241,23 +241,23 @@ function NoteListSection({
   return (
     <section className="mb-6">
       {label && (
-        <h2 className="px-1 pb-1 font-heading text-sm font-semibold tracking-wide text-neutral-500 uppercase">
+        <h2 className="px-1 pb-1 font-heading text-sm font-semibold tracking-wide text-zinc-500 uppercase">
           {label}
         </h2>
       )}
-      <ul className="overflow-hidden rounded-xl bg-neutral-900">
+      <ul className="overflow-hidden rounded-xl bg-zinc-900">
         {notes.map((note, index) => (
           <li key={note.id}>
             <div className="flex items-center">
               <button
                 type="button"
                 onClick={() => onOpenNote(note.id)}
-                className="min-w-0 flex-1 px-4 py-3 text-left active:bg-neutral-800"
+                className="min-w-0 flex-1 px-4 py-3 text-left active:bg-zinc-800"
               >
-                <p className="truncate text-base font-semibold text-neutral-100">
+                <p className="truncate text-base font-semibold text-zinc-100">
                   {displayTitle(note)}
                 </p>
-                <p className="mt-0.5 flex gap-2 text-sm text-neutral-500">
+                <p className="mt-0.5 flex gap-2 text-sm text-zinc-500">
                   {/* Show the date the current sort is actually keyed on. */}
                   <span className="shrink-0">
                     {formatEditDate(sortKey === 'created' ? note.createdAt : note.updatedAt)}
@@ -266,7 +266,7 @@ function NoteListSection({
                 </p>
                 {/* Only show which categories a note is in while browsing everything. */}
                 {filter.kind === 'all' && note.categoryIds.length > 0 && (
-                  <p className="mt-1 truncate text-sm text-neutral-600">
+                  <p className="mt-1 truncate text-sm text-zinc-600">
                     {note.categoryIds
                       .map((id) => categories.find((category) => category.id === id)?.name)
                       .filter(Boolean)
@@ -278,12 +278,12 @@ function NoteListSection({
                 type="button"
                 aria-label={`Actions for ${displayTitle(note)}`}
                 onClick={() => onOpenMenu(note)}
-                className="mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-neutral-500 active:bg-neutral-800"
+                className="mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-zinc-500 active:bg-zinc-800"
               >
                 <MoreHorizontal className="size-5" />
               </button>
             </div>
-            {index < notes.length - 1 && <div className="ml-4 border-b border-neutral-800" />}
+            {index < notes.length - 1 && <div className="ml-4 border-b border-zinc-800" />}
           </li>
         ))}
       </ul>

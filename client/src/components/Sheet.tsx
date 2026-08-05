@@ -22,9 +22,9 @@ export default function Sheet({
         onClick={onClose}
         className="absolute inset-0 bg-black/60"
       />
-      <div className="relative mx-auto max-h-96 w-full overflow-y-auto rounded-t-2xl bg-neutral-900 pb-8 sm:max-w-sm sm:rounded-2xl sm:pb-2">
+      <div className="relative mx-auto max-h-96 w-full overflow-y-auto rounded-t-2xl bg-zinc-900 pb-8 sm:max-w-sm sm:rounded-2xl sm:pb-2">
         {title && (
-          <p className="px-4 pt-4 pb-1 font-heading text-sm font-semibold tracking-wide text-neutral-500 uppercase">
+          <p className="px-4 pt-4 pb-1 font-heading text-sm font-semibold tracking-wide text-zinc-500 uppercase">
             {title}
           </p>
         )}
@@ -51,13 +51,13 @@ export function SheetItem({
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center gap-3 px-4 py-3 text-left text-base active:bg-neutral-800 ${
-        destructive ? 'text-red-400' : 'text-neutral-100'
+      className={`flex w-full items-center gap-3 px-4 py-3 text-left text-base active:bg-zinc-800 ${
+        destructive ? 'text-red-400' : 'text-zinc-100'
       }`}
     >
-      {Icon && <Icon className="size-5 shrink-0 text-neutral-400" />}
+      {Icon && <Icon className="size-5 shrink-0 text-zinc-400" />}
       <span className="flex-1 truncate">{label}</span>
-      {selected && <Check className="size-5 shrink-0 text-amber-400" />}
+      {selected && <Check className="size-5 shrink-0 text-cyan-400" />}
     </button>
   )
 }
