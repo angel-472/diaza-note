@@ -1,0 +1,107 @@
+import { useState } from 'react'
+import { Plus, X } from 'lucide-react'
+import Sheet, { SheetItem } from './Sheet'
+import type { Category } from '../lib/types'
+
+type Props = {
+  /** Every category that exists. */
+  categories: Category[]
+  /** Categories currently on this note. */
+  selectedIds: string[]
+  onAdd: (categoryId: string) => void
+  onRemove: (categoryId: string) => void
+  /** Creates a category and returns its new id, so it can be added right away. */
+  onCreateCategory: (name: string) => string
+}
+
+/** The note's category chips, plus a sheet for adding or creating one. */
+export default function NoteCategoriesToolbar({
+  categories,
+  selectedIds,
+  onAdd,
+  onRemove,
+  onCreateCategory,
+}: Props) {
+  const [isPickerOpen, setIsPickerOpen] = useState(false)
+  const [newName, setNewName] = useState('')
+
+  const selected = categories.filter((category) => selectedIds.includes(category.id))
+  const available = categories.filter((category) => !selectedIds.includes(category.id))
+
+  function closePicker() {
+    setIsPickerOpen(false)
+    setNewName('')
+  }
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-2">
+        {selected.map((category) => (
+          <span
+            key={category.id}
+            className="flex items-center gap-1 rounded-full bg-amber-400/15 py-1 pr-1 pl-3 text-sm text-amber-300"
+          >
+            {category.name}
+            <button
+              type="button"
+              aria-label={`Remove from ${category.name}`}
+              onClick={() => onRemove(category.id)}
+              className="flex size-5 items-center justify-center rounded-full text-amber-400 active:bg-amber-400/25"
+            >
+              <X className="size-3" strokeWidth={3} />
+            </button>
+          </span>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => setIsPickerOpen(true)}
+          className="flex items-center gap-1 rounded-full border border-neutral-700 py-1 pr-3 pl-2 text-sm text-neutral-400 active:bg-neutral-900"
+        >
+          <Plus className="size-4" />
+          Category
+        </button>
+      </div>
+
+      {isPickerOpen && (
+        <Sheet title="Add to category" onClose={closePicker}>
+          {available.map((category) => (
+            <SheetItem
+              key={category.id}
+              label={category.name}
+              onClick={() => {
+                onAdd(category.id)
+                closePicker()
+              }}
+            />
+          ))}
+
+          <form
+            className="flex gap-2 px-4 pt-3 pb-2"
+            onSubmit={(event) => {
+              event.preventDefault()
+              const name = newName.trim()
+              if (!name) return
+              onAdd(onCreateCategory(name))
+              closePicker()
+            }}
+          >
+            <input
+              value={newName}
+              onChange={(event) => setNewName(event.target.value)}
+              placeholder="New category"
+              className="min-w-0 flex-1 rounded-lg bg-neutral-800 px-3 py-2 text-base text-neutral-100 outline-none placeholder:text-neutral-500"
+            />
+            <button
+              type="submit"
+              disabled={!newName.trim()}
+              className="shrink-0 rounded-lg bg-amber-400 px-4 py-2 text-base font-semibold text-neutral-950 disabled:bg-neutral-800 disabled:text-neutral-500"
+            >
+              Add
+            </button>
+          </form>
+        </Sheet>
+      )}
+    </>
+  )
+}

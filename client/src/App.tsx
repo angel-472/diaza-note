@@ -1,12 +1,171 @@
-import { useState } from "react"
+import { useState } from 'react'
+
+import CategoriesScreen from './screens/CategoriesScreen'
+import NoteListScreen from './screens/NoteListScreen'
+import EditorScreen from './screens/EditorScreen'
+
+import { MOCK_CATEGORIES, MOCK_NOTES } from './lib/mockData'
+import type { Category, Note, NoteFilter, Screen, SortKey } from './lib/types'
+
+
+
+function getFilterLabel(filter: NoteFilter, categories: Category[]): string {
+  if (filter.kind === 'all') return 'All Notes'
+  if (filter.kind === 'unsorted') return 'Unsorted'
+  return categories.find((category) => category.id === filter.id)?.name ?? 'Category'
+}
+
+/**
+ * MOCK: ids are generated client-side. PLUG IN: let the server assign them.
+ * Not using crypto.randomUUID() — it is undefined over plain http, which is
+ * exactly how `npm run dev --host` is reached from a phone on the LAN.
+ */
+let idCounter = 0
+const newId = (prefix: string) => `${prefix}-${Date.now()}-${idCounter++}`
 
 function App() {
-  const [count, setCount] = useState(0)
+  // MOCK DATA: categories live in memory only.
+  // PLUG IN: load from the backend; mirror create/delete with API calls.
+  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES)
+
+  // MOCK DATA: notes live in memory only — every edit is lost on reload.
+  // PLUG IN: replace this state with server-backed data + mutations.
+  const [notes, setNotes] = useState<Note[]>(MOCK_NOTES)
+
+  // Sort choice is app-wide and resets on reload.
+  // PLUG IN: persist to localStorage or user settings if it should stick.
+  const [sortKey, setSortKey] = useState<SortKey>('edited')
+
+  // Screen state stands in for a router. PLUG IN: swap for real routes
+  // (e.g. `/`, `/c/:categoryId`, `/n/:noteId`) if URLs/back-gesture matter.
+  const [screen, setScreen] = useState<Screen>({ name: 'categories' })
+
+  /** Applies a change to one note and stamps it as just-edited. */
+  function updateNote(noteId: string, change: (note: Note) => Note) {
+    setNotes((current) =>
+      current.map((note) =>
+        note.id === noteId ? { ...change(note), updatedAt: new Date().toISOString() } : note,
+      ),
+    )
+  }
+
+  /** Pinning is not an edit, so it must not move the note in date order. */
+  function togglePin(noteId: string) {
+    setNotes((current) =>
+      current.map((note) =>
+        note.id === noteId ? { ...note, isPinned: !note.isPinned } : note,
+      ),
+    )
+  }
+
+  function deleteNote(noteId: string) {
+    // PLUG IN: `DELETE /notes/:id`. There is no trash/undo — it is gone.
+    setNotes((current) => current.filter((note) => note.id !== noteId))
+  }
+
+  function createCategory(name: string): string {
+    const category: Category = { id: newId('cat'), name }
+    // PLUG IN: `POST /categories`.
+    setCategories((current) => [...current, category])
+    return category.id
+  }
+
+  function deleteCategory(categoryId: string) {
+    // PLUG IN: `DELETE /categories/:id`.
+    setCategories((current) => current.filter((category) => category.id !== categoryId))
+    // Notes survive; they just lose the membership (and may become Unsorted).
+    setNotes((current) =>
+      current.map((note) => ({
+        ...note,
+        categoryIds: note.categoryIds.filter((id) => id !== categoryId),
+      })),
+    )
+  }
+
+  /** Creates an empty note in the current context and opens it straight away. */
+  function createNote(filter: NoteFilter) {
+    const now = new Date().toISOString()
+    const note: Note = {
+      id: newId('note'),
+      title: '',
+      content: '<p></p>',
+      // A new note inherits the category you were browsing.
+      categoryIds: filter.kind === 'category' ? [filter.id] : [],
+      createdAt: now,
+      updatedAt: now,
+      isPinned: false,
+    }
+    // PLUG IN: `POST /notes`.
+    setNotes((current) => [note, ...current])
+    setScreen({ name: 'editor', noteId: note.id, from: filter })
+  }
+
+  if (screen.name === 'categories') {
+    return (
+      <CategoriesScreen
+        categories={categories}
+        notes={notes}
+        onOpenFilter={(filter) => setScreen({ name: 'notes', filter })}
+        onCreateCategory={createCategory}
+        onDeleteCategory={deleteCategory}
+      />
+    )
+  }
+
+  if (screen.name === 'notes') {
+    const { filter } = screen
+    return (
+      <NoteListScreen
+        title={getFilterLabel(filter, categories)}
+        filter={filter}
+        notes={notes}
+        categories={categories}
+        sortKey={sortKey}
+        onChangeSort={setSortKey}
+        onBack={() => setScreen({ name: 'categories' })}
+        onOpenNote={(noteId) => setScreen({ name: 'editor', noteId, from: filter })}
+        onCreateNote={() => createNote(filter)}
+        onTogglePin={togglePin}
+        onDeleteNote={deleteNote}
+      />
+    )
+  }
+
+  const note = notes.find((candidate) => candidate.id === screen.noteId)
+  if (!note) {
+    setScreen({ name: 'notes', filter: screen.from })
+    return null
+  }
 
   return (
-    <>
-      <p className="p-8">Luno Note</p>
-    </>
+    <EditorScreen
+      // Remounts the TipTap instance when a different note is opened.
+      key={note.id}
+      note={note}
+      categories={categories}
+      backLabel={getFilterLabel(screen.from, categories)}
+      onBack={() => setScreen({ name: 'notes', filter: screen.from })}
+      onChangeTitle={(title) => updateNote(note.id, (current) => ({ ...current, title }))}
+      onChangeContent={(content) => updateNote(note.id, (current) => ({ ...current, content }))}
+      onAddCategory={(categoryId) =>
+        updateNote(note.id, (current) => ({
+          ...current,
+          categoryIds: [...current.categoryIds, categoryId],
+        }))
+      }
+      onRemoveCategory={(categoryId) =>
+        updateNote(note.id, (current) => ({
+          ...current,
+          categoryIds: current.categoryIds.filter((id) => id !== categoryId),
+        }))
+      }
+      onCreateCategory={createCategory}
+      onTogglePin={() => togglePin(note.id)}
+      onDelete={() => {
+        deleteNote(note.id)
+        setScreen({ name: 'notes', filter: screen.from })
+      }}
+    />
   )
 }
 
