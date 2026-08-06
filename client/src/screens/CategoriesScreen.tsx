@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronRight, Folder, FolderOpen, FolderPlus, Inbox, Trash2 } from 'lucide-react'
+import { ChevronRight, Folder, FolderOpen, FolderPlus, Inbox, Trash2, SquarePen } from 'lucide-react'
 import Sheet from '../components/Sheet'
 import type { Category, Note, NoteFilter } from '../lib/types'
 import { filterNotes } from '../lib/utils'
@@ -10,6 +10,7 @@ type Props = {
   onOpenFilter: (filter: NoteFilter) => void
   onCreateCategory: (name: string) => void
   onDeleteCategory: (categoryId: string) => void
+  onCreateNote: () => void
 }
 
 type Row = {
@@ -27,6 +28,7 @@ export default function CategoriesScreen({
   onOpenFilter,
   onCreateCategory,
   onDeleteCategory,
+  onCreateNote,
 }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
@@ -104,7 +106,22 @@ export default function CategoriesScreen({
             onRequestDelete={setPendingDelete}
           />
         </div>
+
+        {/* Aligned to the same column as the list rather than the viewport edge. */}
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10">
+          <div className="mx-auto flex max-w-2xl justify-end px-4 pb-6 sm:px-6 lg:max-w-3xl">
+            <button
+              type="button"
+              aria-label="New note"
+              onClick={onCreateNote}
+              className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-cyan-400 text-zinc-950 shadow-lg active:bg-cyan-500"
+            >
+              <SquarePen className="size-6" />
+            </button>
+          </div>
+        </div>
       </div>
+
 
       {isCreateOpen && (
         <NewCategorySheet

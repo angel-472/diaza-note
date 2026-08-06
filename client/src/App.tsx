@@ -109,7 +109,7 @@ function App() {
     setScreen({ name: 'editor', noteId: note.id, from: filter })
   }
 
-  // Runs only once
+  // Runs only once to load notes from storage
   useEffect(() => {
     getAllSavedNotes().then((data) => {
       setNotes(data.map((row) => JSON.parse(row.data)));
@@ -130,6 +130,7 @@ function App() {
         onOpenFilter={(filter) => setScreen({ name: 'notes', filter })}
         onCreateCategory={createCategory}
         onDeleteCategory={deleteCategory}
+        onCreateNote={() => createNote({kind: "unsorted"})}
       />
     )
   }
