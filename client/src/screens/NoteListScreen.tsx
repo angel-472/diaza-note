@@ -15,14 +15,13 @@ import Sheet, { SheetItem } from '../components/Sheet'
 import type { Category, Note, NoteFilter, SortKey } from '../lib/types'
 import {
   SORT_OPTIONS,
-  contentPreview,
   displayTitle,
   filterNotes,
   formatEditDate,
   searchNotes,
   shareNote,
   sortNotes,
-} from '../lib/utils'
+} from 'src/lib/utils'
 
 type Props = {
   title: string
@@ -262,7 +261,7 @@ function NoteListSection({
                   <span className="shrink-0">
                     {formatEditDate(sortKey === 'created' ? note.createdAt : note.updatedAt)}
                   </span>
-                  <span className="truncate">{contentPreview(note.content)}</span>
+                  <span className="truncate">{note.excerpt}</span>
                 </p>
                 {/* Only show which categories a note is in while browsing everything. */}
                 {filter.kind === 'all' && note.categoryIds.length > 0 && (

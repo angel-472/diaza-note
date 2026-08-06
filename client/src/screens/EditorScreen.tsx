@@ -20,6 +20,7 @@ type Props = {
   onCreateCategory: (name: string) => string
   onTogglePin: () => void
   onDelete: () => void
+  updateExcerpt: (excerpt: string) => void
 }
 
 export default function EditorScreen({
@@ -34,6 +35,7 @@ export default function EditorScreen({
   onCreateCategory,
   onTogglePin,
   onDelete,
+  updateExcerpt,
 }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
@@ -50,7 +52,10 @@ export default function EditorScreen({
     },
     // PLUG IN: this fires on every change. Right now it only updates
     // in-memory state in App.tsx — swap in a debounced `PATCH /notes/:id`.
-    onUpdate: ({ editor }) => onChangeContent(editor.getHTML()),
+    onUpdate: ({ editor }) => {
+      onChangeContent(editor.getHTML())
+      updateExcerpt(editor.getText().slice(0, 100))
+    },
   })
 
   return (

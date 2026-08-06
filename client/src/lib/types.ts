@@ -15,6 +15,8 @@ export type Note = {
   updatedAt: string
   /** Pinned notes are grouped above everything else in the note list. */
   isPinned: boolean
+  /** Excerpt (first 100 chars) */
+  excerpt: string
 }
 
 /** Which set of notes the note list is currently showing. */

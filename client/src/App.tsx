@@ -7,6 +7,8 @@ import EditorScreen from './screens/EditorScreen'
 import { MOCK_CATEGORIES, MOCK_NOTES } from './lib/mockData'
 import type { Category, Note, NoteFilter, Screen, SortKey } from './lib/types'
 
+import { saveNote } from './lib/storage/localCache'
+
 
 
 function getFilterLabel(filter: NoteFilter, categories: Category[]): string {
@@ -41,18 +43,25 @@ function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'categories' })
 
   /** Applies a change to one note and stamps it as just-edited. */
-  function updateNote(noteId: string, change: (note: Note) => Note) {
-    setNotes((current) =>
-      current.map((note) =>
-        note.id === noteId ? { ...change(note), updatedAt: new Date().toISOString() } : note,
-      ),
+  function updateNote(noteId: string, transform: (note: Note) => Note) {
+
+    // Updates react state
+    setNotes((prevNotes) =>
+      // Goes through each note on the array and manipulates only the targeted one
+      prevNotes.map((note) => {
+        if (note.id !== noteId) return note;
+        const updatedNote = { ...transform(note), updatedAt: new Date().toISOString() };
+        // TODO: debounce saving so it doesn't run every time a character is typed
+        saveNote(updatedNote);
+        return updatedNote;
+      }),
     )
   }
 
   /** Pinning is not an edit, so it must not move the note in date order. */
   function togglePin(noteId: string) {
-    setNotes((current) =>
-      current.map((note) =>
+    setNotes((prev) =>
+      prev.map((note) =>
         note.id === noteId ? { ...note, isPinned: !note.isPinned } : note,
       ),
     )
@@ -60,29 +69,29 @@ function App() {
 
   function deleteNote(noteId: string) {
     // PLUG IN: `DELETE /notes/:id`. There is no trash/undo — it is gone.
-    setNotes((current) => current.filter((note) => note.id !== noteId))
+    setNotes((prev) => prev.filter((note) => note.id !== noteId))
   }
 
   function createCategory(name: string): string {
     const category: Category = { id: newId('cat'), name }
     // PLUG IN: `POST /categories`.
-    setCategories((current) => [...current, category])
+    setCategories((prev) => [...prev, category])
     return category.id
   }
 
   function deleteCategory(categoryId: string) {
     // PLUG IN: `DELETE /categories/:id`.
-    setCategories((current) => current.filter((category) => category.id !== categoryId))
+    setCategories((prev) => prev.filter((category) => category.id !== categoryId))
     // Notes survive; they just lose the membership (and may become Unsorted).
-    setNotes((current) =>
-      current.map((note) => ({
+    setNotes((prev) =>
+      prev.map((note) => ({
         ...note,
         categoryIds: note.categoryIds.filter((id) => id !== categoryId),
       })),
     )
   }
 
-  /** Creates an empty note in the current context and opens it straight away. */
+  /** Creates an empty note in the prev context and opens it straight away. */
   function createNote(filter: NoteFilter) {
     const now = new Date().toISOString()
     const note: Note = {
@@ -96,7 +105,7 @@ function App() {
       isPinned: false,
     }
     // PLUG IN: `POST /notes`.
-    setNotes((current) => [note, ...current])
+    setNotes((prev) => [note, ...prev])
     setScreen({ name: 'editor', noteId: note.id, from: filter })
   }
 
@@ -145,18 +154,19 @@ function App() {
       categories={categories}
       backLabel={getFilterLabel(screen.from, categories)}
       onBack={() => setScreen({ name: 'notes', filter: screen.from })}
-      onChangeTitle={(title) => updateNote(note.id, (current) => ({ ...current, title }))}
-      onChangeContent={(content) => updateNote(note.id, (current) => ({ ...current, content }))}
+      onChangeTitle={(title) => updateNote(note.id, (prev) => ({ ...prev, title }))}
+      onChangeContent={(content) => updateNote(note.id, (prev) => ({ ...prev, content }))}
+      updateExcerpt={(excerpt) => updateNote(note.id, (prev) => ({...prev, excerpt})) }
       onAddCategory={(categoryId) =>
-        updateNote(note.id, (current) => ({
-          ...current,
-          categoryIds: [...current.categoryIds, categoryId],
+        updateNote(note.id, (prev) => ({
+          ...prev,
+          categoryIds: [...prev.categoryIds, categoryId],
         }))
       }
       onRemoveCategory={(categoryId) =>
-        updateNote(note.id, (current) => ({
-          ...current,
-          categoryIds: current.categoryIds.filter((id) => id !== categoryId),
+        updateNote(note.id, (prev) => ({
+          ...prev,
+          categoryIds: prev.categoryIds.filter((id) => id !== categoryId),
         }))
       }
       onCreateCategory={createCategory}
