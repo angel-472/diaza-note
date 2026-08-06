@@ -32,6 +32,10 @@ function App() {
   const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES)
   const [notes, setNotes] = useState<Note[]>([])
 
+  // True until the first read from storage settles, so the app shows a splash
+  // instead of flashing a categories screen where every count is 0.
+  const [isLoadingNotes, setIsLoadingNotes] = useState(true)
+
   // Sort choice is app-wide and resets on reload.
   // PLUG IN: persist to localStorage or user settings if it should stick.
   const [sortKey, setSortKey] = useState<SortKey>('edited')
@@ -111,16 +115,22 @@ function App() {
 
   // Runs only once to load notes from storage
   useEffect(() => {
-    getAllSavedNotes().then((data) => {
-      setNotes(data.map((row) => JSON.parse(row.data)));
-    })
+    getAllSavedNotes()
+      .then((data) => {
+        setNotes(data.map((row) => JSON.parse(row.data)));
+      })
+      .finally(() => setIsLoadingNotes(false))
   }, []);
 
 
 
-  // 
+  //
   // RENDERING
-  // 
+  //
+
+  if (isLoadingNotes) {
+    return <div className="h-dvh bg-zinc-950" />
+  }
 
   if (screen.name === 'categories') {
     return (
