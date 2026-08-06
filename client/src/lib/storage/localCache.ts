@@ -21,11 +21,18 @@ class AppDatabase extends Dexie {
   }
 }
 
-const db = getWebWorkerDB(new AppDatabase());
+const dbWorker = getWebWorkerDB(new AppDatabase());
 
 
+// 
 // Data persistence functions
+// 
 
 export async function saveNote(note: Note) {
-  await db.notes.put({ id: note.id, data: JSON.stringify(note)});
+  await dbWorker.notes.put({ id: note.id, data: JSON.stringify(note)});
+}
+
+export async function getAllSavedNotes(){
+  const rawData = await dbWorker.notes.toArray();
+  return rawData;
 }

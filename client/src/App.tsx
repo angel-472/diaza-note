@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import CategoriesScreen from './screens/CategoriesScreen'
 import NoteListScreen from './screens/NoteListScreen'
@@ -7,7 +7,7 @@ import EditorScreen from './screens/EditorScreen'
 import { MOCK_CATEGORIES, MOCK_NOTES } from './lib/mockData'
 import type { Category, Note, NoteFilter, Screen, SortKey } from './lib/types'
 
-import { saveNote } from './lib/storage/localCache'
+import { getAllSavedNotes, saveNote } from './lib/storage/localCache'
 
 
 
@@ -25,14 +25,12 @@ function getFilterLabel(filter: NoteFilter, categories: Category[]): string {
 let idCounter = 0
 const newId = (prefix: string) => `${prefix}-${Date.now()}-${idCounter++}`
 
-function App() {
-  // MOCK DATA: categories live in memory only.
-  // PLUG IN: load from the backend; mirror create/delete with API calls.
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES)
 
-  // MOCK DATA: notes live in memory only — every edit is lost on reload.
-  // PLUG IN: replace this state with server-backed data + mutations.
-  const [notes, setNotes] = useState<Note[]>(MOCK_NOTES)
+
+function App() {
+
+  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES)
+  const [notes, setNotes] = useState<Note[]>([])
 
   // Sort choice is app-wide and resets on reload.
   // PLUG IN: persist to localStorage or user settings if it should stick.
@@ -41,6 +39,7 @@ function App() {
   // Screen state stands in for a router. PLUG IN: swap for real routes
   // (e.g. `/`, `/c/:categoryId`, `/n/:noteId`) if URLs/back-gesture matter.
   const [screen, setScreen] = useState<Screen>({ name: 'categories' })
+
 
   /** Applies a change to one note and stamps it as just-edited. */
   function updateNote(noteId: string, transform: (note: Note) => Note) {
@@ -103,11 +102,25 @@ function App() {
       createdAt: now,
       updatedAt: now,
       isPinned: false,
+      excerpt: '',
     }
     // PLUG IN: `POST /notes`.
     setNotes((prev) => [note, ...prev])
     setScreen({ name: 'editor', noteId: note.id, from: filter })
   }
+
+  // Runs only once
+  useEffect(() => {
+    getAllSavedNotes().then((data) => {
+      setNotes(data.map((row) => JSON.parse(row.data)));
+    })
+  }, []);
+
+
+
+  // 
+  // RENDERING
+  // 
 
   if (screen.name === 'categories') {
     return (
@@ -140,6 +153,7 @@ function App() {
     )
   }
 
+  // Try to find a note with the screen noteId, if not found then set screen to notes list
   const note = notes.find((candidate) => candidate.id === screen.noteId)
   if (!note) {
     setScreen({ name: 'notes', filter: screen.from })
