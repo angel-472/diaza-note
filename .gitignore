@@ -25,3 +25,6 @@ dist-ssr
 
 
 *.env*
+
+# Local markdown instructions
+*.local.md

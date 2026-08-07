@@ -4,10 +4,32 @@ import CategoriesScreen from './screens/CategoriesScreen'
 import NoteListScreen from './screens/NoteListScreen'
 import EditorScreen from './screens/EditorScreen'
 
-import { MOCK_CATEGORIES, MOCK_NOTES } from './lib/mockData'
+import { MOCK_CATEGORIES } from './lib/mockData'
 import type { Category, Note, NoteFilter, Screen, SortKey } from './lib/types'
 
 import { getAllSavedNotes, saveNote } from './lib/storage/localCache'
+
+import {
+  SIGNALS,
+  type AddNoteCategory,
+  type ChangeNoteContent,
+  type ChangeNoteTitle,
+  type ChangeSortKey,
+  type CreateCategory,
+  type CreateNote,
+  type CreateNoteCategory,
+  type DeleteCategory,
+  type DeleteNote,
+  type OpenNote,
+  type OpenNoteList,
+  type RemoveNoteCategory,
+  type ToggleNotePin,
+} from 'src/lib/signal/signals'
+
+import { signal } from 'src/lib/signal/signalManager'
+
+/** Identifies App's subscriptions to the signal manager. */
+const SUBSCRIBER_ID = 'App'
 
 
 
@@ -61,40 +83,7 @@ function App() {
     )
   }
 
-  /** Pinning is not an edit, so it must not move the note in date order. */
-  function togglePin(noteId: string) {
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === noteId ? { ...note, isPinned: !note.isPinned } : note,
-      ),
-    )
-  }
-
-  function deleteNote(noteId: string) {
-    // PLUG IN: `DELETE /notes/:id`. There is no trash/undo — it is gone.
-    setNotes((prev) => prev.filter((note) => note.id !== noteId))
-  }
-
-  function createCategory(name: string): string {
-    const category: Category = { id: newId('cat'), name }
-    // PLUG IN: `POST /categories`.
-    setCategories((prev) => [...prev, category])
-    return category.id
-  }
-
-  function deleteCategory(categoryId: string) {
-    // PLUG IN: `DELETE /categories/:id`.
-    setCategories((prev) => prev.filter((category) => category.id !== categoryId))
-    // Notes survive; they just lose the membership (and may become Unsorted).
-    setNotes((prev) =>
-      prev.map((note) => ({
-        ...note,
-        categoryIds: note.categoryIds.filter((id) => id !== categoryId),
-      })),
-    )
-  }
-
-  /** Creates an empty note in the prev context and opens it straight away. */
+  /** Creates an empty note in the given context and opens it straight away. */
   function createNote(filter: NoteFilter) {
     const now = new Date().toISOString()
     const note: Note = {
@@ -112,6 +101,117 @@ function App() {
     setNotes((prev) => [note, ...prev])
     setScreen({ name: 'editor', noteId: note.id, from: filter })
   }
+
+  /** Creates a category and hands back the record, so callers can use its id. */
+  function createCategory(name: string): Category {
+    const category: Category = { id: newId('cat'), name }
+    // PLUG IN: `POST /categories`.
+    setCategories((prev) => [...prev, category])
+    return category
+  }
+
+  // Subscriptions are set up once. Every handler reads state through the
+  // functional setters, so none of them can capture a stale value.
+  useEffect(() => {
+    signal.sub(SIGNALS.OPEN_NOTE_LIST, SUBSCRIBER_ID, ({ filter }: OpenNoteList) =>
+      setScreen({ name: 'notes', filter }),
+    )
+
+    signal.sub(SIGNALS.OPEN_CATEGORIES, SUBSCRIBER_ID, () => setScreen({ name: 'categories' }))
+
+    // The note list the note was opened from is where closing it returns to.
+    signal.sub(SIGNALS.OPEN_NOTE, SUBSCRIBER_ID, ({ noteId }: OpenNote) =>
+      setScreen((prev) =>
+        prev.name === 'notes' ? { name: 'editor', noteId, from: prev.filter } : prev,
+      ),
+    )
+
+    signal.sub(SIGNALS.CLOSE_NOTE, SUBSCRIBER_ID, () =>
+      setScreen((prev) => (prev.name === 'editor' ? { name: 'notes', filter: prev.from } : prev)),
+    )
+
+    signal.sub(SIGNALS.CREATE_NOTE, SUBSCRIBER_ID, ({ filter }: CreateNote) => createNote(filter))
+
+    signal.sub(SIGNALS.DELETE_NOTE, SUBSCRIBER_ID, ({ noteId }: DeleteNote) => {
+      // PLUG IN: `DELETE /notes/:id`. There is no trash/undo — it is gone.
+      setNotes((prev) => prev.filter((note) => note.id !== noteId))
+      // Deleting the note you are reading has to take you back out of it.
+      setScreen((prev) =>
+        prev.name === 'editor' && prev.noteId === noteId
+          ? { name: 'notes', filter: prev.from }
+          : prev,
+      )
+    })
+
+    /** Pinning is not an edit, so it must not move the note in date order. */
+    signal.sub(SIGNALS.TOGGLE_NOTE_PIN, SUBSCRIBER_ID, ({ noteId }: ToggleNotePin) =>
+      setNotes((prev) =>
+        prev.map((note) => (note.id === noteId ? { ...note, isPinned: !note.isPinned } : note)),
+      ),
+    )
+
+    signal.sub(SIGNALS.CHANGE_NOTE_TITLE, SUBSCRIBER_ID, ({ noteId, title }: ChangeNoteTitle) =>
+      updateNote(noteId, (note) => ({ ...note, title })),
+    )
+
+    signal.sub(
+      SIGNALS.CHANGE_NOTE_CONTENT,
+      SUBSCRIBER_ID,
+      ({ noteId, content, excerpt }: ChangeNoteContent) =>
+        updateNote(noteId, (note) => ({ ...note, content, excerpt })),
+    )
+
+    signal.sub(SIGNALS.ADD_NOTE_CATEGORY, SUBSCRIBER_ID, ({ noteId, categoryId }: AddNoteCategory) =>
+      updateNote(noteId, (note) => ({
+        ...note,
+        categoryIds: [...note.categoryIds, categoryId],
+      })),
+    )
+
+    signal.sub(
+      SIGNALS.REMOVE_NOTE_CATEGORY,
+      SUBSCRIBER_ID,
+      ({ noteId, categoryId }: RemoveNoteCategory) =>
+        updateNote(noteId, (note) => ({
+          ...note,
+          categoryIds: note.categoryIds.filter((id) => id !== categoryId),
+        })),
+    )
+
+    signal.sub(
+      SIGNALS.CREATE_NOTE_CATEGORY,
+      SUBSCRIBER_ID,
+      ({ noteId, name }: CreateNoteCategory) => {
+        const category = createCategory(name)
+        updateNote(noteId, (note) => ({
+          ...note,
+          categoryIds: [...note.categoryIds, category.id],
+        }))
+      },
+    )
+
+    signal.sub(SIGNALS.CREATE_CATEGORY, SUBSCRIBER_ID, ({ name }: CreateCategory) =>
+      createCategory(name),
+    )
+
+    signal.sub(SIGNALS.DELETE_CATEGORY, SUBSCRIBER_ID, ({ categoryId }: DeleteCategory) => {
+      // PLUG IN: `DELETE /categories/:id`.
+      setCategories((prev) => prev.filter((category) => category.id !== categoryId))
+      // Notes survive; they just lose the membership (and may become Unsorted).
+      setNotes((prev) =>
+        prev.map((note) => ({
+          ...note,
+          categoryIds: note.categoryIds.filter((id) => id !== categoryId),
+        })),
+      )
+    })
+
+    signal.sub(SIGNALS.CHANGE_SORT_KEY, SUBSCRIBER_ID, ({ sortKey }: ChangeSortKey) =>
+      setSortKey(sortKey),
+    )
+
+    return () => signal.unsubAll(SUBSCRIBER_ID)
+  }, [])
 
   // Runs only once to load notes from storage
   useEffect(() => {
@@ -133,16 +233,7 @@ function App() {
   }
 
   if (screen.name === 'categories') {
-    return (
-      <CategoriesScreen
-        categories={categories}
-        notes={notes}
-        onOpenFilter={(filter) => setScreen({ name: 'notes', filter })}
-        onCreateCategory={createCategory}
-        onDeleteCategory={deleteCategory}
-        onCreateNote={() => createNote({kind: "unsorted"})}
-      />
-    )
+    return <CategoriesScreen categories={categories} notes={notes} />
   }
 
   if (screen.name === 'notes') {
@@ -154,12 +245,6 @@ function App() {
         notes={notes}
         categories={categories}
         sortKey={sortKey}
-        onChangeSort={setSortKey}
-        onBack={() => setScreen({ name: 'categories' })}
-        onOpenNote={(noteId) => setScreen({ name: 'editor', noteId, from: filter })}
-        onCreateNote={() => createNote(filter)}
-        onTogglePin={togglePin}
-        onDeleteNote={deleteNote}
       />
     )
   }
@@ -178,28 +263,6 @@ function App() {
       note={note}
       categories={categories}
       backLabel={getFilterLabel(screen.from, categories)}
-      onBack={() => setScreen({ name: 'notes', filter: screen.from })}
-      onChangeTitle={(title) => updateNote(note.id, (prev) => ({ ...prev, title }))}
-      onChangeContent={(content) => updateNote(note.id, (prev) => ({ ...prev, content }))}
-      updateExcerpt={(excerpt) => updateNote(note.id, (prev) => ({...prev, excerpt})) }
-      onAddCategory={(categoryId) =>
-        updateNote(note.id, (prev) => ({
-          ...prev,
-          categoryIds: [...prev.categoryIds, categoryId],
-        }))
-      }
-      onRemoveCategory={(categoryId) =>
-        updateNote(note.id, (prev) => ({
-          ...prev,
-          categoryIds: prev.categoryIds.filter((id) => id !== categoryId),
-        }))
-      }
-      onCreateCategory={createCategory}
-      onTogglePin={() => togglePin(note.id)}
-      onDelete={() => {
-        deleteNote(note.id)
-        setScreen({ name: 'notes', filter: screen.from })
-      }}
     />
   )
 }

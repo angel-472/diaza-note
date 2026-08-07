@@ -22,6 +22,8 @@ import {
   shareNote,
   sortNotes,
 } from 'src/lib/utils'
+import { signal } from 'src/lib/signal/signalManager'
+import { SIGNALS } from 'src/lib/signal/signals'
 
 type Props = {
   title: string
@@ -29,27 +31,9 @@ type Props = {
   notes: Note[]
   categories: Category[]
   sortKey: SortKey
-  onChangeSort: (sortKey: SortKey) => void
-  onBack: () => void
-  onOpenNote: (noteId: string) => void
-  onCreateNote: () => void
-  onTogglePin: (noteId: string) => void
-  onDeleteNote: (noteId: string) => void
 }
 
-export default function NoteListScreen({
-  title,
-  filter,
-  notes,
-  categories,
-  sortKey,
-  onChangeSort,
-  onBack,
-  onOpenNote,
-  onCreateNote,
-  onTogglePin,
-  onDeleteNote,
-}: Props) {
+export default function NoteListScreen({ title, filter, notes, categories, sortKey }: Props) {
   const [query, setQuery] = useState('')
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [menuNote, setMenuNote] = useState<Note | null>(null)
@@ -66,7 +50,7 @@ export default function NoteListScreen({
       <header className="mx-auto w-full max-w-2xl shrink-0 px-4 pt-4 sm:px-6 lg:max-w-3xl">
         <button
           type="button"
-          onClick={onBack}
+          onClick={() => signal.emit(SIGNALS.OPEN_CATEGORIES)}
           className="-ml-1 flex items-center gap-1 py-1 pr-3 text-base text-cyan-400 active:opacity-60"
         >
           <ChevronLeft className="size-5" />
@@ -122,7 +106,6 @@ export default function NoteListScreen({
                   filter={filter}
                   categories={categories}
                   sortKey={sortKey}
-                  onOpenNote={onOpenNote}
                   onOpenMenu={setMenuNote}
                 />
               )}
@@ -133,7 +116,6 @@ export default function NoteListScreen({
                   filter={filter}
                   categories={categories}
                   sortKey={sortKey}
-                  onOpenNote={onOpenNote}
                   onOpenMenu={setMenuNote}
                 />
               )}
@@ -148,7 +130,7 @@ export default function NoteListScreen({
           <button
             type="button"
             aria-label="New note"
-            onClick={onCreateNote}
+            onClick={() => signal.emit(SIGNALS.CREATE_NOTE, { filter })}
             className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-cyan-400 text-zinc-950 shadow-lg active:bg-cyan-500"
           >
             <SquarePen className="size-6" />
@@ -164,7 +146,7 @@ export default function NoteListScreen({
               label={option.label}
               selected={option.key === sortKey}
               onClick={() => {
-                onChangeSort(option.key)
+                signal.emit(SIGNALS.CHANGE_SORT_KEY, { sortKey: option.key })
                 setIsSortOpen(false)
               }}
             />
@@ -178,7 +160,7 @@ export default function NoteListScreen({
             label={menuNote.isPinned ? 'Unpin' : 'Pin'}
             icon={menuNote.isPinned ? PinOff : Pin}
             onClick={() => {
-              onTogglePin(menuNote.id)
+              signal.emit(SIGNALS.TOGGLE_NOTE_PIN, { noteId: menuNote.id })
               setMenuNote(null)
             }}
           />
@@ -209,7 +191,7 @@ export default function NoteListScreen({
             icon={Trash2}
             destructive
             onClick={() => {
-              onDeleteNote(pendingDelete.id)
+              signal.emit(SIGNALS.DELETE_NOTE, { noteId: pendingDelete.id })
               setPendingDelete(null)
             }}
           />
@@ -226,7 +208,6 @@ function NoteListSection({
   filter,
   categories,
   sortKey,
-  onOpenNote,
   onOpenMenu,
 }: {
   label?: string
@@ -234,7 +215,6 @@ function NoteListSection({
   filter: NoteFilter
   categories: Category[]
   sortKey: SortKey
-  onOpenNote: (noteId: string) => void
   onOpenMenu: (note: Note) => void
 }) {
   return (
@@ -250,7 +230,7 @@ function NoteListSection({
             <div className="flex items-center">
               <button
                 type="button"
-                onClick={() => onOpenNote(note.id)}
+                onClick={() => signal.emit(SIGNALS.OPEN_NOTE, { noteId: note.id })}
                 className="min-w-0 flex-1 px-4 py-3 text-left active:bg-zinc-800"
               >
                 <p className="truncate text-base font-semibold text-zinc-100">

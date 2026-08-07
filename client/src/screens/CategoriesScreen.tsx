@@ -3,14 +3,12 @@ import { ChevronRight, Folder, FolderOpen, FolderPlus, Inbox, Trash2, SquarePen 
 import Sheet from '../components/Sheet'
 import type { Category, Note, NoteFilter } from '../lib/types'
 import { filterNotes } from '../lib/utils'
+import { signal } from 'src/lib/signal/signalManager'
+import { SIGNALS } from 'src/lib/signal/signals'
 
 type Props = {
   categories: Category[]
   notes: Note[]
-  onOpenFilter: (filter: NoteFilter) => void
-  onCreateCategory: (name: string) => void
-  onDeleteCategory: (categoryId: string) => void
-  onCreateNote: () => void
 }
 
 type Row = {
@@ -22,14 +20,7 @@ type Row = {
   deletable: boolean
 }
 
-export default function CategoriesScreen({
-  categories,
-  notes,
-  onOpenFilter,
-  onCreateCategory,
-  onDeleteCategory,
-  onCreateNote,
-}: Props) {
+export default function CategoriesScreen({ categories, notes }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<Category | null>(null)
@@ -93,7 +84,6 @@ export default function CategoriesScreen({
             notes={notes}
             categories={categories}
             isEditing={isEditing}
-            onOpenFilter={onOpenFilter}
             onRequestDelete={setPendingDelete}
           />
           <div className="h-6" />
@@ -102,7 +92,6 @@ export default function CategoriesScreen({
             notes={notes}
             categories={categories}
             isEditing={isEditing}
-            onOpenFilter={onOpenFilter}
             onRequestDelete={setPendingDelete}
           />
         </div>
@@ -113,7 +102,7 @@ export default function CategoriesScreen({
             <button
               type="button"
               aria-label="New note"
-              onClick={onCreateNote}
+              onClick={() => signal.emit(SIGNALS.CREATE_NOTE, { filter: { kind: 'unsorted' } })}
               className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-cyan-400 text-zinc-950 shadow-lg active:bg-cyan-500"
             >
               <SquarePen className="size-6" />
@@ -127,7 +116,7 @@ export default function CategoriesScreen({
         <NewCategorySheet
           onClose={() => setIsCreateOpen(false)}
           onCreate={(name) => {
-            onCreateCategory(name)
+            signal.emit(SIGNALS.CREATE_CATEGORY, { name })
             setIsCreateOpen(false)
           }}
         />
@@ -141,7 +130,7 @@ export default function CategoriesScreen({
           <button
             type="button"
             onClick={() => {
-              onDeleteCategory(pendingDelete.id)
+              signal.emit(SIGNALS.DELETE_CATEGORY, { categoryId: pendingDelete.id })
               setPendingDelete(null)
             }}
             className="w-full px-4 py-3 text-left text-base text-red-400 active:bg-zinc-800"
@@ -166,14 +155,12 @@ function RowGroup({
   notes,
   categories,
   isEditing,
-  onOpenFilter,
   onRequestDelete,
 }: {
   rows: Row[]
   notes: Note[]
   categories: Category[]
   isEditing: boolean
-  onOpenFilter: (filter: NoteFilter) => void
   onRequestDelete: (category: Category) => void
 }) {
   if (rows.length === 0) return null
@@ -190,7 +177,7 @@ function RowGroup({
             <div className="flex items-center">
               <button
                 type="button"
-                onClick={() => onOpenFilter(row.filter)}
+                onClick={() => signal.emit(SIGNALS.OPEN_NOTE_LIST, { filter: row.filter })}
                 className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left active:bg-zinc-800"
               >
                 <Icon className="size-5 shrink-0 text-cyan-400" strokeWidth={2} />

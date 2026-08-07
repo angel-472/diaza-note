@@ -2,26 +2,20 @@ import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import Sheet, { SheetItem } from './Sheet'
 import type { Category } from '../lib/types'
+import { signal } from 'src/lib/signal/signalManager'
+import { SIGNALS } from 'src/lib/signal/signals'
 
 type Props = {
+  /** The note being edited. */
+  noteId: string
   /** Every category that exists. */
   categories: Category[]
   /** Categories currently on this note. */
   selectedIds: string[]
-  onAdd: (categoryId: string) => void
-  onRemove: (categoryId: string) => void
-  /** Creates a category and returns its new id, so it can be added right away. */
-  onCreateCategory: (name: string) => string
 }
 
 /** The note's category chips, plus a sheet for adding or creating one. */
-export default function NoteCategoriesToolbar({
-  categories,
-  selectedIds,
-  onAdd,
-  onRemove,
-  onCreateCategory,
-}: Props) {
+export default function NoteCategoriesToolbar({ noteId, categories, selectedIds }: Props) {
   const [isPickerOpen, setIsPickerOpen] = useState(false)
   const [newName, setNewName] = useState('')
 
@@ -45,7 +39,9 @@ export default function NoteCategoriesToolbar({
             <button
               type="button"
               aria-label={`Remove from ${category.name}`}
-              onClick={() => onRemove(category.id)}
+              onClick={() =>
+                signal.emit(SIGNALS.REMOVE_NOTE_CATEGORY, { noteId, categoryId: category.id })
+              }
               className="flex size-5 items-center justify-center rounded-full text-cyan-400 active:bg-cyan-400/25"
             >
               <X className="size-3" strokeWidth={3} />
@@ -70,7 +66,7 @@ export default function NoteCategoriesToolbar({
               key={category.id}
               label={category.name}
               onClick={() => {
-                onAdd(category.id)
+                signal.emit(SIGNALS.ADD_NOTE_CATEGORY, { noteId, categoryId: category.id })
                 closePicker()
               }}
             />
@@ -82,7 +78,7 @@ export default function NoteCategoriesToolbar({
               event.preventDefault()
               const name = newName.trim()
               if (!name) return
-              onAdd(onCreateCategory(name))
+              signal.emit(SIGNALS.CREATE_NOTE_CATEGORY, { noteId, name })
               closePicker()
             }}
           >

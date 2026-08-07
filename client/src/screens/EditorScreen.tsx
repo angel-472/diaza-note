@@ -7,36 +7,16 @@ import NoteCategoriesToolbar from '../components/NoteCategoriesToolbar'
 import Sheet, { SheetItem } from '../components/Sheet'
 import type { Category, Note } from '../lib/types'
 import { displayTitle, shareNote } from '../lib/utils'
+import { signal } from 'src/lib/signal/signalManager'
+import { SIGNALS } from 'src/lib/signal/signals'
 
 type Props = {
   note: Note
   categories: Category[]
   backLabel: string
-  onBack: () => void
-  onChangeTitle: (title: string) => void
-  onChangeContent: (html: string) => void
-  onAddCategory: (categoryId: string) => void
-  onRemoveCategory: (categoryId: string) => void
-  onCreateCategory: (name: string) => string
-  onTogglePin: () => void
-  onDelete: () => void
-  updateExcerpt: (excerpt: string) => void
 }
 
-export default function EditorScreen({
-  note,
-  categories,
-  backLabel,
-  onBack,
-  onChangeTitle,
-  onChangeContent,
-  onAddCategory,
-  onRemoveCategory,
-  onCreateCategory,
-  onTogglePin,
-  onDelete,
-  updateExcerpt,
-}: Props) {
+export default function EditorScreen({ note, categories, backLabel }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false)
 
@@ -53,8 +33,11 @@ export default function EditorScreen({
     // PLUG IN: this fires on every change. Right now it only updates
     // in-memory state in App.tsx — swap in a debounced `PATCH /notes/:id`.
     onUpdate: ({ editor }) => {
-      onChangeContent(editor.getHTML())
-      updateExcerpt(editor.getText().slice(0, 100))
+      signal.emit(SIGNALS.CHANGE_NOTE_CONTENT, {
+        noteId: note.id,
+        content: editor.getHTML(),
+        excerpt: editor.getText().slice(0, 100),
+      })
     },
   })
 
@@ -64,7 +47,7 @@ export default function EditorScreen({
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-2 px-2 pt-4 pb-2 sm:px-4 lg:max-w-3xl">
           <button
             type="button"
-            onClick={onBack}
+            onClick={() => signal.emit(SIGNALS.CLOSE_NOTE)}
             className="flex min-w-0 items-center gap-1 py-1 pr-3 text-base text-cyan-400 active:opacity-60"
           >
             <ChevronLeft className="size-5 shrink-0" />
@@ -91,18 +74,18 @@ export default function EditorScreen({
         <div className="mx-auto w-full max-w-2xl px-4 sm:px-6 lg:max-w-3xl">
           <input
             value={note.title}
-            onChange={(event) => onChangeTitle(event.target.value)}
+            onChange={(event) =>
+              signal.emit(SIGNALS.CHANGE_NOTE_TITLE, { noteId: note.id, title: event.target.value })
+            }
             placeholder="Title"
             className="w-full pt-4 pb-2 text-2xl font-bold tracking-tight text-zinc-50 outline-none placeholder:text-zinc-600 sm:text-3xl"
           />
 
           <div className="pb-3">
             <NoteCategoriesToolbar
+              noteId={note.id}
               categories={categories}
               selectedIds={note.categoryIds}
-              onAdd={onAddCategory}
-              onRemove={onRemoveCategory}
-              onCreateCategory={onCreateCategory}
             />
           </div>
 
@@ -116,7 +99,7 @@ export default function EditorScreen({
             label={note.isPinned ? 'Unpin' : 'Pin'}
             icon={note.isPinned ? PinOff : Pin}
             onClick={() => {
-              onTogglePin()
+              signal.emit(SIGNALS.TOGGLE_NOTE_PIN, { noteId: note.id })
               setIsMenuOpen(false)
             }}
           />
@@ -146,7 +129,12 @@ export default function EditorScreen({
           onClose={() => setIsConfirmingDelete(false)}
         >
           {/* Deleting from here also navigates back — App.tsx owns that. */}
-          <SheetItem label="Delete Note" icon={Trash2} destructive onClick={onDelete} />
+          <SheetItem
+            label="Delete Note"
+            icon={Trash2}
+            destructive
+            onClick={() => signal.emit(SIGNALS.DELETE_NOTE, { noteId: note.id })}
+          />
           <SheetItem label="Cancel" onClick={() => setIsConfirmingDelete(false)} />
         </Sheet>
       )}
