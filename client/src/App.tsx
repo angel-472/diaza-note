@@ -7,7 +7,7 @@ import EditorScreen from './screens/EditorScreen'
 import { MOCK_CATEGORIES } from './lib/mockData'
 import type { Category, Note, NoteFilter, Screen, SortKey } from './lib/types'
 
-import { getAllSavedNotes, saveNote } from './lib/storage/localCache'
+import { getAllSavedNotes, getCategories, saveCategories, saveNote } from './lib/storage/localCache'
 
 import {
   SIGNALS,
@@ -51,7 +51,7 @@ const newId = (prefix: string) => `${prefix}-${Date.now()}-${idCounter++}`
 
 function App() {
 
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES)
+  const [categories, setCategories] = useState<Category[]>([])
   const [notes, setNotes] = useState<Note[]>([])
 
   // True until the first read from storage settles, so the app shows a splash
@@ -59,12 +59,13 @@ function App() {
   const [isLoadingNotes, setIsLoadingNotes] = useState(true)
 
   // Sort choice is app-wide and resets on reload.
-  // PLUG IN: persist to localStorage or user settings if it should stick.
   const [sortKey, setSortKey] = useState<SortKey>('edited')
 
   // Screen state stands in for a router. PLUG IN: swap for real routes
   // (e.g. `/`, `/c/:categoryId`, `/n/:noteId`) if URLs/back-gesture matter.
   const [screen, setScreen] = useState<Screen>({ name: 'categories' })
+
+
 
 
   /** Applies a change to one note and stamps it as just-edited. */
@@ -190,8 +191,10 @@ function App() {
       },
     )
 
-    signal.sub(SIGNALS.CREATE_CATEGORY, SUBSCRIBER_ID, ({ name }: CreateCategory) =>
-      createCategory(name),
+    signal.sub(SIGNALS.CREATE_CATEGORY, SUBSCRIBER_ID, ({ name }: CreateCategory) => {
+        createCategory(name)
+        console.log('new category')
+      }
     )
 
     signal.sub(SIGNALS.DELETE_CATEGORY, SUBSCRIBER_ID, ({ categoryId }: DeleteCategory) => {
@@ -214,13 +217,31 @@ function App() {
   }, [])
 
   // Runs only once to load notes from storage
+  let dataLoadRan = false;
   useEffect(() => {
+    if(dataLoadRan == true) return;
+    dataLoadRan = true;
     getAllSavedNotes()
       .then((data) => {
         setNotes(data.map((row) => JSON.parse(row.data)));
       })
+      
+    getCategories()
+      .then((data) => {
+        console.log(data)
+        setCategories(data)
+      })
       .finally(() => setIsLoadingNotes(false))
   }, []);
+
+
+  // Listens for changes to categories to persist them
+  useEffect(() => {
+    if(isLoadingNotes == true) return; //avoids saving the empty state before the local cache loads
+
+    saveCategories(categories);
+  }, [categories])
+
 
 
 

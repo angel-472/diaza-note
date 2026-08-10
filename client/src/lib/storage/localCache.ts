@@ -1,11 +1,11 @@
 import Dexie, { type Table } from "dexie";
 import { getWebWorkerDB } from "dexie-worker";
-import type { Note } from "src/lib/types";
+import type { Note, Category } from "src/lib/types";
 
 const DATABASE_NAME = "SecondBrainDatabase";
 
 type NoteRow = { id: string; data: string };
-type UserDataRow = { id?: number; data: string };
+type UserDataRow = { id?: string; data: string };
 
 class AppDatabase extends Dexie {
   /** `declare` so TS types these without emitting fields that would clobber Dexie's runtime properties. */
@@ -35,4 +35,16 @@ export async function saveNote(note: Note) {
 export async function getAllSavedNotes(){
   const rawData = await dbWorker.notes.toArray();
   return rawData;
+}
+
+export async function saveCategories(categories: Category[]){
+  await dbWorker.user_data.put({id: 'categories', data: JSON.stringify(categories)})
+}
+
+export async function getCategories(){
+  const rawData = await dbWorker.user_data.get({id: 'categories'});
+  if(rawData == undefined){
+    return [];
+  }
+  return JSON.parse(rawData.data);
 }
