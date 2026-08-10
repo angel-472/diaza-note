@@ -28,3 +28,10 @@ dist-ssr
 
 # Local markdown instructions
 *.local.md
+
+
+#Python 
+.venv/
+__pycache__/
+*.pyc
+.env
