@@ -4,10 +4,9 @@ import CategoriesScreen from './screens/CategoriesScreen'
 import NoteListScreen from './screens/NoteListScreen'
 import EditorScreen from './screens/EditorScreen'
 
-import { MOCK_CATEGORIES } from './lib/mockData'
 import type { Category, Note, NoteFilter, Screen, SortKey } from './lib/types'
 
-import { getAllSavedNotes, getCategories, saveCategories, saveNote } from './lib/storage/localCache'
+import { deleteNote, getAllSavedNotes, getCategories, saveCategories, saveNote } from './lib/storage/localCache'
 
 import {
   SIGNALS,
@@ -136,6 +135,7 @@ function App() {
     signal.sub(SIGNALS.DELETE_NOTE, SUBSCRIBER_ID, ({ noteId }: DeleteNote) => {
       // PLUG IN: `DELETE /notes/:id`. There is no trash/undo — it is gone.
       setNotes((prev) => prev.filter((note) => note.id !== noteId))
+      deleteNote(noteId);
       // Deleting the note you are reading has to take you back out of it.
       setScreen((prev) =>
         prev.name === 'editor' && prev.noteId === noteId
@@ -202,10 +202,16 @@ function App() {
       setCategories((prev) => prev.filter((category) => category.id !== categoryId))
       // Notes survive; they just lose the membership (and may become Unsorted).
       setNotes((prev) =>
-        prev.map((note) => ({
-          ...note,
-          categoryIds: note.categoryIds.filter((id) => id !== categoryId),
-        })),
+        prev.map((note) => {
+          // Notes that never had the category stay untouched, so they are not re-saved.
+          if (!note.categoryIds.includes(categoryId)) return note
+          const updatedNote = {
+            ...note,
+            categoryIds: note.categoryIds.filter((id) => id !== categoryId),
+          }
+          saveNote(updatedNote)
+          return updatedNote
+        }),
       )
     })
 

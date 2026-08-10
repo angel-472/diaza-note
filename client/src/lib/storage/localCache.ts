@@ -32,6 +32,10 @@ export async function saveNote(note: Note) {
   await dbWorker.notes.put({ id: note.id, data: JSON.stringify(note)});
 }
 
+export async function deleteNote(noteId: string) {
+  await dbWorker.notes.delete(noteId);
+}
+
 export async function getAllSavedNotes(){
   const rawData = await dbWorker.notes.toArray();
   return rawData;
