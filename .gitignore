@@ -30,8 +30,11 @@ dist-ssr
 *.local.md
 
 
-#Python 
+#Python
 .venv/
 __pycache__/
 *.pyc
 .env
+
+# ...but template files are safe to commit
+!.env.example
