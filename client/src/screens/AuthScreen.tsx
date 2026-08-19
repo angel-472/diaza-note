@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { authClient } from 'src/lib/authClient'
 
 type Mode = 'signin' | 'signup'
 
@@ -25,6 +26,31 @@ export default function AuthScreen() {
     password.length > 0 &&
     (!isSignUp || (confirmPassword.length > 0 && confirmPassword === password))
 
+  
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    // PLUG IN: call the auth endpoint for `mode` here.
+    console.log(event)
+    if(mode === 'signin') {
+      authClient.login(email, password).then(() => {
+        console.log('Login successful')
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    } else {
+      authClient.register(email, password).then(() => {
+        console.log('Registration successful')
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    }
+  }
+
+  // 
+  // RENDERING
+  // 
   return (
     <div className="flex h-dvh flex-col bg-zinc-900">
       <div className="flex flex-1 flex-col justify-center overflow-y-auto">
@@ -39,7 +65,7 @@ export default function AuthScreen() {
           <form
             onSubmit={(event) => {
               event.preventDefault()
-              // PLUG IN: call the auth endpoint for `mode` here.
+              onSubmit(event);
             }}
           >
             {/* Same grouped-rows treatment as the category and note lists. */}
@@ -129,4 +155,3 @@ export default function AuthScreen() {
     </div>
   )
 }
- 
