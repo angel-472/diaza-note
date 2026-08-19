@@ -2,9 +2,11 @@ from fastapi import FastAPI
 
 from src.db import lifespan
 from src.routers import notes
+from src import auth
 
 app = FastAPI(lifespan=lifespan)
 
+app.include_router(auth.router)
 app.include_router(notes.router)
 
 

@@ -5,12 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.db import get_conn
+from src.auth import current_user
 
 router = APIRouter(prefix="/notes", tags=["notes"])
-
-# No auth yet, so every note belongs to the same stand-in user. Swap this for
-# the authenticated id once there is one; the column is already in place.
-USER_ID = "local"
 
 NOTE_COLUMNS = """
     note_id, title, content, category_ids, excerpt,
@@ -49,12 +46,12 @@ def to_note(row: asyncpg.Record) -> dict:
 
 
 @router.get("/{note_id}")
-async def read_note(note_id: str, conn: asyncpg.Connection = Depends(get_conn)):
+async def read_note(note_id: str, user=Depends(current_user), conn: asyncpg.Connection = Depends(get_conn)):
     row = await conn.fetchrow(
         f"SELECT {NOTE_COLUMNS} FROM notes"
         " WHERE note_id = $1 AND user_id = $2 AND deleted_at IS NULL",
         note_id,
-        USER_ID,
+        user["id"],
     )
     if row is None:
         raise HTTPException(status_code=404, detail="Note not found")
@@ -63,7 +60,7 @@ async def read_note(note_id: str, conn: asyncpg.Connection = Depends(get_conn)):
 
 @router.put("/{note_id}")
 async def upsert_note(
-    note_id: str, note: Note, conn: asyncpg.Connection = Depends(get_conn)
+    note_id: str, note: Note, user=Depends(current_user), conn: asyncpg.Connection = Depends(get_conn)
 ):
     if note.id != note_id:
         raise HTTPException(
@@ -91,7 +88,7 @@ async def upsert_note(
         RETURNING server_seq
         """,
         note_id,
-        USER_ID,
+        user["id"],
         note.title,
         note.content,
         note.category_ids,
