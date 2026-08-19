@@ -26,6 +26,7 @@ import {
 } from 'src/lib/signal/signals'
 
 import { signal } from 'src/lib/signal/signalManager'
+import AuthScreen from './screens/AuthScreen'
 
 /** Identifies App's subscriptions to the signal manager. */
 const SUBSCRIBER_ID = 'App'
@@ -64,6 +65,8 @@ function App() {
   // (e.g. `/`, `/c/:categoryId`, `/n/:noteId`) if URLs/back-gesture matter.
   const [screen, setScreen] = useState<Screen>({ name: 'categories' })
 
+  // User 
+  const [user, setUser] = useState<{ id: string; email: string } | null>(null)
 
 
 
@@ -255,8 +258,12 @@ function App() {
   // RENDERING
   //
 
-  if (isLoadingNotes) {
-    return <div className="h-dvh bg-zinc-950" />
+  if (isLoadingNotes ) {
+    return <div className="h-dvh bg-zinc-900" />
+  }
+
+  if(!user) {
+    return <AuthScreen />
   }
 
   if (screen.name === 'categories') {
