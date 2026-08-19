@@ -91,7 +91,7 @@ export default function NoteCategoriesToolbar({ noteId, categories, selectedIds 
             <button
               type="submit"
               disabled={!newName.trim()}
-              className="shrink-0 rounded-lg bg-cyan-400 px-4 py-2 text-base font-semibold text-zinc-950 disabled:bg-zinc-800 disabled:text-zinc-500"
+              className="shrink-0 rounded-lg bg-cyan-400 px-4 py-2 text-base font-semibold text-zinc-900 disabled:bg-zinc-800 disabled:text-zinc-500"
             >
               Add
             </button>

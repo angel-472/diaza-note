@@ -123,7 +123,7 @@ function ToolButton({
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
-        active ? 'bg-cyan-400 text-zinc-950' : 'text-zinc-400 active:bg-zinc-800'
+        active ? 'bg-cyan-400 text-zinc-900' : 'text-zinc-400 active:bg-zinc-800'
       }`}
     >
       <Icon className="size-5" strokeWidth={2} />

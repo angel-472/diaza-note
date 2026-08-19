@@ -51,7 +51,7 @@ export default function CategoriesScreen({ categories, notes }: Props) {
   }))
 
   return (
-    <div className="flex h-dvh flex-col bg-zinc-950">
+    <div className="flex h-dvh flex-col bg-zinc-900">
       <header className="mx-auto w-full max-w-2xl shrink-0 px-4 pt-6 pb-3 sm:px-6 lg:max-w-3xl">
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-heading text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">
@@ -103,7 +103,7 @@ export default function CategoriesScreen({ categories, notes }: Props) {
               type="button"
               aria-label="New note"
               onClick={() => signal.emit(SIGNALS.CREATE_NOTE, { filter: { kind: 'unsorted' } })}
-              className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-cyan-400 text-zinc-950 shadow-lg active:bg-cyan-500"
+              className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-cyan-400 text-zinc-900 shadow-lg active:bg-cyan-500"
             >
               <SquarePen className="size-6" />
             </button>
@@ -236,7 +236,7 @@ function NewCategorySheet({
         <button
           type="submit"
           disabled={!name.trim()}
-          className="w-full rounded-lg bg-cyan-400 py-2 text-base font-semibold text-zinc-950 disabled:bg-zinc-800 disabled:text-zinc-500"
+          className="w-full rounded-lg bg-cyan-400 py-2 text-base font-semibold text-zinc-900 disabled:bg-zinc-800 disabled:text-zinc-500"
         >
           Create
         </button>

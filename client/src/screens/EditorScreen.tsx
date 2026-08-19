@@ -42,7 +42,7 @@ export default function EditorScreen({ note, categories, backLabel }: Props) {
   })
 
   return (
-    <div className="flex h-dvh flex-col bg-zinc-950">
+    <div className="flex h-dvh flex-col bg-zinc-900">
       <header className="shrink-0">
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-2 px-2 pt-4 pb-2 sm:px-4 lg:max-w-3xl">
           <button

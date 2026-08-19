@@ -46,7 +46,7 @@ export default function NoteListScreen({ title, filter, notes, categories, sortK
   const sortLabel = SORT_OPTIONS.find((option) => option.key === sortKey)?.label ?? ''
 
   return (
-    <div className="flex h-dvh flex-col bg-zinc-950">
+    <div className="flex h-dvh flex-col bg-zinc-900">
       <header className="mx-auto w-full max-w-2xl shrink-0 px-4 pt-4 sm:px-6 lg:max-w-3xl">
         <button
           type="button"
@@ -131,7 +131,7 @@ export default function NoteListScreen({ title, filter, notes, categories, sortK
             type="button"
             aria-label="New note"
             onClick={() => signal.emit(SIGNALS.CREATE_NOTE, { filter })}
-            className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-cyan-400 text-zinc-950 shadow-lg active:bg-cyan-500"
+            className="pointer-events-auto flex size-14 items-center justify-center rounded-full bg-cyan-400 text-zinc-900 shadow-lg active:bg-cyan-500"
           >
             <SquarePen className="size-6" />
           </button>
