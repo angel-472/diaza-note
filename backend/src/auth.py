@@ -43,8 +43,8 @@ def issue_session(response: Response, user_id: str) -> None:
     )
 
 
-@router.post("/signup")
-async def signup(
+@router.post("/register")
+async def register(
     body: LoginBody, response: Response, db: asyncpg.Connection = Depends(get_conn)
 ):
     try:
@@ -105,3 +105,8 @@ async def current_user(
     if user is None:
         raise HTTPException(401, "Not authenticated")
     return user
+
+
+@router.get("/me")
+async def me(user=Depends(current_user)):
+    return {"id": user["id"], "email": user["email"]}
