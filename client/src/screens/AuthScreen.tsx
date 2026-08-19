@@ -23,7 +23,7 @@ export default function AuthScreen() {
   const isMismatched = isSignUp && confirmPassword.length > 0 && confirmPassword !== password
   const canSubmit =
     email.trim().length > 0 &&
-    password.length > 0 &&
+    password.length >= 8 &&
     (!isSignUp || (confirmPassword.length > 0 && confirmPassword === password))
 
   
@@ -32,15 +32,17 @@ export default function AuthScreen() {
     // PLUG IN: call the auth endpoint for `mode` here.
     console.log(event)
     if(mode === 'signin') {
-      authClient.login(email, password).then(() => {
+      authClient.login(email, password).then((data) => {
         console.log('Login successful')
+        console.log(data)
       })
       .catch((error) => {
         console.error(error)
       })
     } else {
-      authClient.register(email, password).then(() => {
+      authClient.register(email, password).then((data) => {
         console.log('Registration successful')
+        console.log(data)
       })
       .catch((error) => {
         console.error(error)

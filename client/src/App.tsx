@@ -237,7 +237,6 @@ function App() {
       
     getCategories()
       .then((data) => {
-        console.log(data)
         setCategories(data)
       })
       .finally(() => setIsLoadingNotes(false))
