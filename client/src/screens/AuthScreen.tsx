@@ -17,6 +17,7 @@ export default function AuthScreen() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const isSignUp = mode === 'signup'
   // Only complain once there is something to compare against, so the message
@@ -27,26 +28,38 @@ export default function AuthScreen() {
     password.length >= 8 &&
     (!isSignUp || (confirmPassword.length > 0 && confirmPassword === password))
 
+
+
+  const handleAuthError = (error: Error) => {
+    if(error.message === 'Sign-in failed') {
+      setErrorMessage('Sign-in failed. Please check your email and password.')
+    } else if(error.message === 'Sign-up failed') {
+      setErrorMessage('Sign-up failed. Please try again.')
+    } else {
+      setErrorMessage('An unexpected error occurred. Please try again later.')
+    }
+  }
+
   
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    // PLUG IN: call the auth endpoint for `mode` here.
-    console.log(event)
+    errorMessage && setErrorMessage('') // Clear any previous error message
     if(mode === 'signin') {
       authClient.login(email, password).then((data) => {
         console.log('Login successful')
         signal.emit("AUTH_STATE_CHANGED");
       })
       .catch((error) => {
-        console.error(error)
+        handleAuthError(error);
       })
     } else {
       authClient.register(email, password).then((data) => {
         console.log('Registration successful')
         console.log(data)
+        signal.emit("AUTH_STATE_CHANGED");
       })
       .catch((error) => {
-        console.error(error)
+        handleAuthError(error);
       })
     }
   }
@@ -129,6 +142,11 @@ export default function AuthScreen() {
             {isMismatched && (
               <p className="px-1 pt-2 text-sm text-red-400">Passwords do not match.</p>
             )}
+            
+            {errorMessage && (
+              <p className="text-red-400 px-4 py-2 text-sm border-red-400 border-1 rounded-lg">{errorMessage}</p>
+            )}
+            
 
             <button
               type="submit"
@@ -147,6 +165,7 @@ export default function AuthScreen() {
                 // button the next time sign up is opened.
                 setConfirmPassword('')
                 setMode(isSignUp ? 'signin' : 'signup')
+                setErrorMessage('') // Clear error message when switching modes
               }}
               className="rounded-lg px-2 py-1 text-base text-cyan-400 active:bg-zinc-900"
             >
