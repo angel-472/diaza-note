@@ -28,6 +28,8 @@ import {
 import { signal } from 'src/lib/signal/signalManager'
 import AuthScreen from './screens/AuthScreen'
 
+import { authClient } from 'src/lib/authClient'
+
 /** Identifies App's subscriptions to the signal manager. */
 const SUBSCRIBER_ID = 'App'
 
@@ -56,7 +58,7 @@ function App() {
 
   // True until the first read from storage settles, so the app shows a splash
   // instead of flashing a categories screen where every count is 0.
-  const [isLoadingNotes, setIsLoadingNotes] = useState(true)
+  const [isLoadingData, setIsLoadingData] = useState(true)
 
   // Sort choice is app-wide and resets on reload.
   const [sortKey, setSortKey] = useState<SortKey>('edited')
@@ -239,13 +241,18 @@ function App() {
       .then((data) => {
         setCategories(data)
       })
-      .finally(() => setIsLoadingNotes(false))
+
+    authClient.getCurrentUser()
+      .then((data) => {
+        setUser(data)
+    })
+      .finally(() => setIsLoadingData(false))
   }, []);
 
 
   // Listens for changes to categories to persist them
   useEffect(() => {
-    if(isLoadingNotes == true) return; //avoids saving the empty state before the local cache loads
+    if(isLoadingData == true) return; //avoids saving the empty state before the local cache loads
 
     saveCategories(categories);
   }, [categories])
@@ -257,7 +264,7 @@ function App() {
   // RENDERING
   //
 
-  if (isLoadingNotes ) {
+  if (isLoadingData) {
     return <div className="h-dvh bg-zinc-900" />
   }
 
