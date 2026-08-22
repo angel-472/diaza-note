@@ -224,6 +224,13 @@ function App() {
       setSortKey(sortKey),
     )
 
+    signal.sub("AUTH_STATE_CHANGED", SUBSCRIBER_ID, () => {
+      authClient.getCurrentUser()
+        .then((data) => {
+          setUser(data)
+      });
+    })
+
     return () => signal.unsubAll(SUBSCRIBER_ID)
   }, [])
 
@@ -256,13 +263,6 @@ function App() {
 
     saveCategories(categories);
   }, [categories])
-
-  signal.sub("AUTH_STATE_CHANGED", SUBSCRIBER_ID, () => {
-    authClient.getCurrentUser()
-      .then((data) => {
-        setUser(data)
-    });
-  })
 
 
 
