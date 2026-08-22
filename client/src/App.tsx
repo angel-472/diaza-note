@@ -257,6 +257,12 @@ function App() {
     saveCategories(categories);
   }, [categories])
 
+  signal.sub("AUTH_STATE_CHANGED", SUBSCRIBER_ID, () => {
+    authClient.getCurrentUser()
+      .then((data) => {
+        setUser(data)
+    });
+  })
 
 
 

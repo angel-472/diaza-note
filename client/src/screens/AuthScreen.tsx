@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { authClient } from 'src/lib/authClient'
+import { signal } from 'src/lib/signal/signalManager'
 
 type Mode = 'signin' | 'signup'
 
@@ -34,7 +35,7 @@ export default function AuthScreen() {
     if(mode === 'signin') {
       authClient.login(email, password).then((data) => {
         console.log('Login successful')
-        console.log(data)
+        signal.emit("AUTH_STATE_CHANGED");
       })
       .catch((error) => {
         console.error(error)
