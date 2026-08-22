@@ -166,7 +166,7 @@ function RowGroup({
   if (rows.length === 0) return null
 
   return (
-    <ul className="overflow-hidden rounded-xl bg-zinc-900">
+    <ul className="overflow-hidden rounded-xl bg-zinc-800/50">
       {rows.map((row, index) => {
         const Icon = row.icon
         const count = filterNotes(notes, row.filter).length

@@ -67,7 +67,7 @@ export default function NoteListScreen({ title, filter, notes, categories, sortK
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search"
-            className="w-full rounded-lg bg-zinc-900 py-2 pr-9 pl-9 text-base text-zinc-100 outline-none placeholder:text-zinc-500"
+            className="w-full rounded-lg bg-zinc-800/50 py-2 pr-9 pl-9 text-base text-zinc-100 outline-none placeholder:text-zinc-500"
           />
           {query && (
             <button
@@ -224,7 +224,7 @@ function NoteListSection({
           {label}
         </h2>
       )}
-      <ul className="overflow-hidden rounded-xl bg-zinc-900">
+      <ul className="overflow-hidden rounded-xl bg-zinc-800/50">
         {notes.map((note, index) => (
           <li key={note.id}>
             <div className="flex items-center">
