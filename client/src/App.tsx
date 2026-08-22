@@ -41,11 +41,7 @@ function getFilterLabel(filter: NoteFilter, categories: Category[]): string {
   return categories.find((category) => category.id === filter.id)?.name ?? 'Category'
 }
 
-/**
- * MOCK: ids are generated client-side. PLUG IN: let the server assign them.
- * Not using crypto.randomUUID() — it is undefined over plain http, which is
- * exactly how `npm run dev --host` is reached from a phone on the LAN.
- */
+
 let idCounter = 0
 const newId = (prefix: string) => `${prefix}-${Date.now()}-${idCounter++}`
 
