@@ -30,6 +30,8 @@ import AuthScreen from './screens/AuthScreen'
 
 import { authClient } from 'src/lib/authClient'
 
+import { makeSlug } from 'src/lib/wordSlug'
+
 /** Identifies App's subscriptions to the signal manager. */
 const SUBSCRIBER_ID = 'App'
 
@@ -43,7 +45,10 @@ function getFilterLabel(filter: NoteFilter, categories: Category[]): string {
 
 
 let idCounter = 0
-const newId = (prefix: string) => `${prefix}-${Date.now()}-${idCounter++}`
+function newId() : string {
+  const slug = makeSlug();
+  return slug; 
+}
 
 
 
@@ -88,7 +93,7 @@ function App() {
   function createNote(filter: NoteFilter) {
     const now = new Date().toISOString()
     const note: Note = {
-      id: newId('note'),
+      id: newId(),
       title: '',
       content: '<p></p>',
       // A new note inherits the category you were browsing.
@@ -105,7 +110,7 @@ function App() {
 
   /** Creates a category and hands back the record, so callers can use its id. */
   function createCategory(name: string): Category {
-    const category: Category = { id: newId('cat'), name }
+    const category: Category = { id: newId(), name }
     // PLUG IN: `POST /categories`.
     setCategories((prev) => [...prev, category])
     return category
