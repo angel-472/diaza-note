@@ -43,8 +43,6 @@ function getFilterLabel(filter: NoteFilter, categories: Category[]): string {
   return categories.find((category) => category.id === filter.id)?.name ?? 'Category'
 }
 
-
-let idCounter = 0
 function newId() : string {
   const slug = makeSlug();
   return slug; 
